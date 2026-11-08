@@ -16,14 +16,13 @@ IT 支持 / 开发 / 运维方向的个人站点。纯静态站点：无构建�
 | `projects.html` | **项目页**：11 个项目按四类归档，每块带锚点（`#terminal`、`#snmp`、`#cam` 等） | 项目描述、状态标签、技术要点 |
 | `notes.html` | **笔记页**：黑苹果专题 + 计划中的运维专题 | 笔记条目、计划选题 |
 | `about.html` | **关于页**：工作方法、技术栈 | 履历、技能标签 |
-| `404.html` | 找不到页面时的兜底页（含柯基） | 提示语 |
+| `404.html` | 找不到页面时的兜底页（含柯基），Cloudflare Pages 自动识别 | 提示语 |
 | `style.css` | **全站样式表**，顶部 `:root` 是配色变量 | 颜色、字号、间距 |
 | `site.js` | 文档页的搜索、目录高亮、图片放大、复制代码 | 一般不用动 |
 | `overview.html`<br>`hardware.html`<br>`display.html`<br>`cpu.html`<br>`build.html`<br>`wifi.html`<br>`files.html` | 黑苹果 7 篇文档页 | 正文内容（`.prose` 区域） |
 | `images/` | 卡通小狗 SVG + 真实照片 | 换图直接替换同名文件 |
 | `search-index.json` | 文档页搜索用的索引 | 新增文档后需手动补条目 |
 | `_headers` | Cloudflare 响应头（安全头 + 图片缓存） | 一般不用动 |
-| `wrangler.jsonc` | Cloudflare Workers 部署配置（`name` 必须与线上 Worker 名一致；`not_found_handling` 启用自定义 404 页） | 改 Worker 名时才动 |
 | `source-*` | 从 [zbook-g10-hackintosh](https://github.com/EnormousKnob/zbook-g10-hackintosh) 同步的原始文档、SSDT、config.plist、脚本 | **不要手改**，等上游更新后重新同步 |
 
 ---
