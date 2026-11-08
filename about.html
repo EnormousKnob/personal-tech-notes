@@ -1,1 +1,93 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>关于本站 · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" ><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" ><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" ><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" ><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" ><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="selected" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><p class="eyebrow">ABOUT THE NOTEBOOK</p><h1 class="page-title">你好，这里是 Jeff 的技术手记。</h1><p class="lead">围绕 IT 支持、开发和运维，记录解决问题的过程。</p><article class="prose"><h2>从实际问题开始</h2><p>本站的第一个专题来自 HP ZBook Power G10 黑苹果项目。这里既保留可复现的配置与排查过程，也明确记录尚未解决的问题和使用限制。</p><h2>内容与来源</h2><p>本版导入了 <a href="https://github.com/EnormousKnob/zbook-g10-hackintosh">EnormousKnob/zbook-g10-hackintosh</a> 的 README、三篇专题文档、七张截图，以及公开的 EFI 配置与脚本。硬件支持状态、测试数据与技术结论均来自原项目记录，不代表所有同型号机器都能复现。</p><p>来源版本：<a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/commit/8d82ccede59dbaedd293be48a9fbbe55233f8ebf"><code>8d82ccede59dbaedd293be48a9fbbe55233f8ebf</code></a><br>导入日期：2026 年 11 月 8 日。本版是内容快照，不自动跟随原仓库更新。</p><h2>开源许可</h2><p>原项目文档与脚本按 MIT 许可使用，版权声明保留于<a href="source-LICENSE">原始 LICENSE</a>。第三方驱动及其项目遵循各自许可。</p><h2>简单、轻量</h2><p>页面、搜索和阅读功能不需要登录，不使用广告、统计追踪或付费接口。图片和样式随网站一同托管，正文无需 JavaScript 也可阅读。</p></article></main><aside class="right-rail"><div class="rail-section"><p class="eyebrow">READING PATH</p><h3>从这里开始</h3><a class="path-link" href="hardware.html"><b>01</b><span>确认硬件与限制<small>先判断是否适合你的机器</small></span>↗</a><a class="path-link" href="display.html"><b>02</b><span>理解问题与方案<small>沿着证据链阅读排障过程</small></span>↗</a><a class="path-link" href="build.html"><b>03</b><span>构建，然后验证<small>保留回退路径，再动手修改</small></span>↗</a></div><div class="rail-note"><span>值得先看</span><h3>能用，也有边界。</h3><p>此配置禁用了睡眠。CPU 上限已调整，但持续频率仍约 3.7–3.9GHz。</p><a href="hardware.html">查看已知限制 →</a></div><div class="rail-source"><p class="eyebrow">SOURCE OF TRUTH</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh">zbook-g10-hackintosh ↗</a><p>文档来自公开项目，保留原始记录与 MIT 许可。</p><code>8d82cce</code></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="关于 Jeff：IT 支持、开发与运维从业者。本站记录真实的排障过程、自动化方案与项目文档。">
+<title>关于 · Jeff 的技术站</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">跳转到正文</a>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术站<small>SUPPORT · DEVELOPMENT · OPERATIONS</small></span></a>
+  <nav class="top-nav" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="projects.html">项目</a>
+    <a href="notes.html">笔记</a>
+    <a href="about.html" aria-current="page">关于</a>
+    <a href="https://github.com/EnormousKnob" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </nav>
+  <button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开导航">☰</button>
+</header>
+
+<main id="main" tabindex="-1">
+<div class="wrap page">
+  <p class="eyebrow"><span class="orange-line"></span> ABOUT</p>
+  <h1 class="page-title">你好，我是 Jeff。</h1>
+  <p class="page-lede">做 IT 支持、开发和运维。日常工作是让终端能用、让服务稳定、让重复的事情不再重复做。这个站是我的工作台记录：解决过的问题、验证过的配置、以及还没解决的部分。</p>
+
+  <div class="sec-head">
+    <h2>我怎么做事</h2>
+    <span>四条自用原则</span>
+  </div>
+  <section class="pillars four" aria-label="工作方法">
+    <article class="pillar">
+      <p class="pillar-num">01</p>
+      <h3>先复现，再动手</h3>
+      <p>现象描述不清就先想办法复现它。复现不了的问题，改配置基本靠猜。</p>
+    </article>
+    <article class="pillar">
+      <p class="pillar-num">02</p>
+      <h3>沿着证据链走</h3>
+      <p>日志、寄存器、返回值，一个环节一个环节往下排，不跳过中间步骤直接换方案。</p>
+    </article>
+    <article class="pillar">
+      <p class="pillar-num">03</p>
+      <h3>留回退路径</h3>
+      <p>改动之前先确认能退回去。备份 EFI、留快照、记录原始值，都是五分钟的事。</p>
+    </article>
+    <article class="pillar">
+      <p class="pillar-num">04</p>
+      <h3>写下来才算完成</h3>
+      <p>能写成文档的解决方案才会被复用。包括边界在哪、什么情况下不适用。</p>
+    </article>
+  </section>
+
+  <div class="sec-head">
+    <h2>技术栈</h2>
+    <span>按使用频率，不按热度</span>
+  </div>
+  <div class="stack-row">
+    <span class="chip">Windows 系统管理</span><span class="chip">Python</span><span class="chip">PowerShell</span><span class="chip">BAT</span><span class="chip">GUI 开发</span><span class="chip">多线程</span><span class="chip">Zabbix</span><span class="chip">SNMP</span><span class="chip">Webhook</span><span class="chip">OpenCV</span><span class="chip">HP CMSL / HPIA</span><span class="chip">OpenCore / ACPI</span><span class="chip">Linux</span><span class="chip">备份与恢复</span>
+  </div>
+
+  <div class="sec-head">
+    <h2>关于本站</h2>
+    <span>内容来源与许可</span>
+  </div>
+  <p class="page-lede" style="margin-bottom:16px">Hackintosh 专题的内容来自公开仓库 <a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer" style="color:var(--orange);text-decoration:underline">EnormousKnob/zbook-g10-hackintosh</a> 的 README、三篇专题文档、七张截图，以及公开的 EFI 配置与脚本。硬件支持状态、测试数据与技术结论均来自原项目记录，不代表所有同型号机器都能复现。原项目文档与脚本按 MIT 许可使用，版权声明保留于原始 LICENSE。</p>
+  <p class="page-lede" style="margin-bottom:16px">本站是纯静态站点：不需要登录，没有广告、统计追踪和付费接口，页面不依赖后端服务。内容更新通过重新构建发布，而不是实时同步原仓库。</p>
+  <p class="todo">说明：Zabbix、Python、Linux、Windows 相关项目正在按实际环境脱敏整理，尚未公开细节。如果你对其中某一块感兴趣，可以先在 GitHub 上找我。</p>
+
+  <section class="cta">
+    <div>
+      <h3>想聊聊具体的技术问题？</h3>
+      <p>带上现象、日志和已经试过的方法，沟通效率会高很多。</p>
+    </div>
+    <a class="btn btn-primary" href="https://github.com/EnormousKnob" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span>
+  <a href="notes.html">技术笔记</a>
+  <span>静态托管 · 无广告 · 无追踪</span>
+</footer>
+<div class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

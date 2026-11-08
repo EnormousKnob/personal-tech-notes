@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="卡通柯基">
+  <ellipse cx="50" cy="92" rx="26" ry="4" fill="#e7dfd2"/>
+  <path d="M29 44C23 24 27 9 35 11c8 2 9 19 9 33z" fill="#d8974a"/>
+  <path d="M71 44c6-20 2-35-6-33-8 2-9 19-9 33z" fill="#d8974a"/>
+  <path d="M33 40c-3-14-1-24 3-23 4 1 5 13 5 23z" fill="#f5dfc0"/>
+  <path d="M67 40c3-14 1-24-3-23-4 1-5 13-5 23z" fill="#f5dfc0"/>
+  <circle cx="50" cy="56" r="28" fill="#e8b26a"/>
+  <path d="M50 28c-8 6-11 16-11 25 0 10 4 20 11 24 7-4 11-14 11-24 0-9-3-19-11-25z" fill="#fbf6ec"/>
+  <ellipse cx="35" cy="58" rx="4.6" ry="3" fill="#eaa885" opacity=".55"/>
+  <ellipse cx="65" cy="58" rx="4.6" ry="3" fill="#eaa885" opacity=".55"/>
+  <ellipse cx="50" cy="70" rx="16" ry="11" fill="#fbf6ec"/>
+  <ellipse cx="50" cy="63" rx="6.4" ry="4.9" fill="#2b2926"/>
+  <path d="M50 68v4M50 72c-2 3-5 4-8 3M50 72c2 3 5 4 8 3" stroke="#2b2926" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M45 76h10c0 5-2 9-5 9s-5-4-5-9z" fill="#de8b84"/>
+  <circle cx="39" cy="52" r="4" fill="#2b2926"/>
+  <circle cx="40" cy="50.8" r="1.2" fill="#fff"/>
+  <circle cx="61" cy="52" r="4" fill="#2b2926"/>
+  <circle cx="62" cy="50.8" r="1.2" fill="#fff"/>
+  <path d="M34 86h32v6a4 4 0 0 1-4 4H38a4 4 0 0 1-4-4z" fill="#b4502a"/>
+  <circle cx="50" cy="93" r="3" fill="#f0c9a8"/>
+</svg>

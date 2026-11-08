@@ -1,0 +1,14 @@
+# 系统与编辑器产生的文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# 本地预览与临时文件
+_*.html
+.wrangler/
+node_modules/
+
+# 内容源快照解压目录（如需要可自行放开）
+_tmp/

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Jeff 的项目清单：Windows 终端集中管理、软件分发、驱动自动化、SNMP 打印机监控、企微缓存清理、视频监控与黑苹果配置，共 11 个项目记录。">
+<title>项目 · Jeff 的技术站</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">跳转到正文</a>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术站<small>SUPPORT · DEVELOPMENT · OPERATIONS</small></span></a>
+  <nav class="top-nav" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="projects.html" aria-current="page">项目</a>
+    <a href="notes.html">笔记</a>
+    <a href="about.html">关于</a>
+    <a href="https://github.com/EnormousKnob" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </nav>
+  <button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开导航">☰</button>
+</header>
+
+<main id="main" tabindex="-1">
+<div class="wrap page">
+  <p class="eyebrow"><span class="orange-line"></span> PROJECTS / 11</p>
+  <h1 class="page-title">项目清单</h1>
+  <p class="page-lede">一条主线：把重复的终端支持工作变成可复用的工具，再把工具接进集中管理与监控。状态标注区分三档——<b>设计与部分实现</b>（架构与核心功能已落地，部分在规划）、<b>开发记录</b>（完成开发与调试）、<b>探索阶段</b>（验证过可行性，未完全落地）。细节持续补齐中。</p>
+
+  <section class="proj-block" id="hackintosh">
+    <div class="proj-top"><span class="tag">终端兼容</span><span class="status live">文档已公开</span></div>
+    <h2>HP ZBook Power G10 黑苹果</h2>
+    <p>HP ZBook Power G10（i7-13700H）在 macOS 26 Tahoe 上的完整可用配置记录：每一项硬件当前能不能用、靠什么实现、遇到什么问题、怎么解决的。内屏 eDP、触摸板、Wi-Fi、蓝牙、音频、电池、摄像头与 USB 全部可用；睡眠按取舍主动禁用。</p>
+    <div class="stack-row"><span class="chip">OpenCore</span><span class="chip">ACPI / SSDT</span><span class="chip">Kext</span><span class="chip">LaunchDaemon</span><span class="chip">内核日志分析</span></div>
+    <div class="links">
+      <a class="btn btn-primary" href="overview.html">项目全记录 →</a>
+      <a class="btn btn-ghost" href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub 仓库 ↗</a>
+      <a class="btn btn-ghost" href="files.html">EFI 与脚本</a>
+    </div>
+  </section>
+
+  <div class="sec-head" style="margin-top:52px">
+    <h2>终端管理与标准化</h2>
+    <span>让大量 Windows 终端有章可循</span>
+  </div>
+
+  <section class="proj-block" id="terminal">
+    <div class="proj-top"><span class="tag">终端管理</span><span class="status">设计 + 部分实现</span></div>
+    <h2>企业 Windows 终端集中管理平台</h2>
+    <p>客户端 / 服务端架构的终端管理系统：客户端自动采集设备序列号、硬件配置、网络信息与已安装软件；服务端支持远程下发 PowerShell、BAT 脚本及 EXE 安装包，覆盖系统配置、注册表与组策略的远程管理。</p>
+    <p>配套能力包括客户端在线更新、执行日志回传、设备筛选，以及与资产系统的对接。整体覆盖企业终端「看得见、够得着、管得住」三个层面。</p>
+    <div class="stack-row"><span class="chip">客户端 / 服务端架构</span><span class="chip">远程任务调度</span><span class="chip">PowerShell</span><span class="chip">注册表 / 组策略</span></div>
+  </section>
+
+  <section class="proj-block" id="hpdrv">
+    <div class="proj-top"><span class="tag">驱动管理</span><span class="status">开发记录</span></div>
+    <h2>HP 商用电脑驱动自动化管理系统</h2>
+    <p>基于 HP 官方驱动管理工具（HP CMSL / HPIA）开发的企业笔记本驱动查询、下载与版本维护程序：按机型及 Windows 版本获取匹配驱动，展示名称、版本、发布日期、分类与下载链接。</p>
+    <p>支持多线程下载、自动命名与本地存储，并设计了 NAS 驱动仓库的全量初始化与后续增量更新机制，让驱动库可以长期维护而不是一次性工程。</p>
+    <div class="stack-row"><span class="chip">HP CMSL</span><span class="chip">HPIA</span><span class="chip">PowerShell</span><span class="chip">Python</span><span class="chip">JSON 版本管理</span></div>
+  </section>
+
+  <section class="proj-block" id="selfsvc">
+    <div class="proj-top"><span class="tag">IT 服务</span><span class="status">开发记录</span></div>
+    <h2>企业 IT 资源自助安装工具</h2>
+    <p>面向普通员工的自助式装机入口：图形化展示可安装的软件与打印机资源，按办公地点分类；选择后自动下载并执行安装程序，完成后自动退出，并支持局域网共享资源的快速映射。</p>
+    <p>价值在于把「找 IT 装个软件 / 连个打印机」这类高频工单，变成员工自己点两下就能完成的事。</p>
+    <div class="stack-row"><span class="chip">Python GUI</span><span class="chip">BAT</span><span class="chip">共享资源映射</span><span class="chip">自动化安装</span></div>
+  </section>
+
+  <div class="sec-head" style="margin-top:52px">
+    <h2>自动化工具</h2>
+    <span>重复操作逐一收敛成程序</span>
+  </div>
+
+  <section class="proj-block" id="softdl">
+    <div class="proj-top"><span class="tag">软件分发</span><span class="status">开发记录</span></div>
+    <h2>企业常用软件下载与自动更新工具</h2>
+    <p>Windows 图形化下载工具，统一管理企业常用软件的获取：自动获取官方下载地址、版本信息与更新时间，支持并发下载、实时进度展示、自动重命名与同名文件替换。</p>
+    <p>同时对接内部 NAS 软件仓库做版本比对与更新通知，让「装最新版」不再依赖谁记得去官网查。</p>
+    <div class="stack-row"><span class="chip">Python</span><span class="chip">Tkinter</span><span class="chip">HTTP / 网页解析</span><span class="chip">多线程</span><span class="chip">PyInstaller</span></div>
+  </section>
+
+  <section class="proj-block" id="wecache">
+    <div class="proj-top"><span class="tag">终端优化</span><span class="status">开发记录</span></div>
+    <h2>企业微信缓存分析与智能清理工具</h2>
+    <p>针对企业微信长期运行堆积的缓存，开发可视化扫描与清理工具：自动识别用户缓存目录与缓存类型，按文件、图片、视频、语音分类统计占用，支持按时间清理、分类清理与预计释放空间计算。</p>
+    <p>进阶能力覆盖历史用户数据目录扫描、自定义缓存位置与回收站清理，并加入系统时间校验与清理过程状态展示，避免「清错了」和「清完了没反应」。</p>
+    <div class="stack-row"><span class="chip">Python</span><span class="chip">Tkinter</span><span class="chip">多线程目录扫描</span><span class="chip">文件系统</span></div>
+  </section>
+
+  <section class="proj-block" id="netfix">
+    <div class="proj-top"><span class="tag">网络运维</span><span class="status">开发记录</span></div>
+    <h2>Windows 网络配置与故障修复工具集</h2>
+    <p>面向 Windows 10/11 的网络排障工具：自动识别当前活跃的有线 / 无线网卡，DNS 自动与手动配置一键切换，集成 Winsock、TCP/IP、DNS 缓存及网络适配器重置，并支持固定 IP、网关、DNS 的快速配置。</p>
+    <p>采用批处理交互菜单设计，需要管理员权限执行——把现场排障时那一串 netsh 命令变成菜单选项，减少重复敲命令和敲错命令。</p>
+    <div class="stack-row"><span class="chip">PowerShell</span><span class="chip">BAT</span><span class="chip">netsh / netcfg</span><span class="chip">网络接口管理</span></div>
+  </section>
+
+  <div class="sec-head" style="margin-top:52px">
+    <h2>监控与告警</h2>
+    <span>让设备主动报告状态</span>
+  </div>
+
+  <section class="proj-block" id="snmp">
+    <div class="proj-top"><span class="tag">设备监控</span><span class="status">开发记录</span></div>
+    <h2>网络打印机耗材监控与告警系统</h2>
+    <p>针对 Canon 网络打印机的独立监控程序：通过 SNMP OID 定时读取 CMYK 各颜色耗材余量，低于阈值或设备离线时，经企业消息 Webhook 自动通知。</p>
+    <p>告警策略做得比较细：支持自定义检测周期与余量阈值，区分工作时间、周末、法定节假日与免打扰时段；程序常驻系统托盘，提供手动检测、日志记录与 INI 配置。</p>
+    <div class="stack-row"><span class="chip">Python</span><span class="chip">SNMP</span><span class="chip">Webhook</span><span class="chip">INI 配置</span><span class="chip">Windows 托盘</span></div>
+  </section>
+
+  <section class="proj-block" id="zabbix">
+    <div class="proj-top"><span class="tag">运维监控</span><span class="status">探索阶段</span></div>
+    <h2>终端状态与应用使用情况接入 Zabbix</h2>
+    <p>探索把企业终端与内部工具的使用情况纳入 Zabbix 集中监控：统计内部软件下载工具的启动与使用次数，通过自定义监控项上报，采用 Zabbix Trapper、HTTP 等接入方式。</p>
+    <p>后续方向是把打印机状态、应用运行情况与终端信息统一进同一套监控体系，让「设备出没出事」从被动报修变成主动发现。</p>
+    <div class="stack-row"><span class="chip">Zabbix</span><span class="chip">自定义监控项</span><span class="chip">Trapper / HTTP API</span><span class="chip">Python</span></div>
+  </section>
+
+  <div class="sec-head" style="margin-top:52px">
+    <h2>实验与探索</h2>
+    <span>验证可行性，也验证边界</span>
+  </div>
+
+  <section class="proj-block" id="cam">
+    <div class="proj-top"><span class="tag">计算机视觉</span><span class="status">开发记录</span></div>
+    <h2>本地视频监控与人脸识别系统</h2>
+    <p>基于普通电脑摄像头的本地监控工具：多摄像头选择、实时预览与自动录像，录像存储配额控制与旧录像循环覆盖；移动目标检测、停留时间判断与邮件告警。</p>
+    <p>识别侧实现了人脸样本采集、模型训练与白名单识别，支持录像时间段导出、后台运行与单实例控制。全程本地处理，不依赖云服务。</p>
+    <div class="stack-row"><span class="chip">Python</span><span class="chip">OpenCV</span><span class="chip">NumPy</span><span class="chip">视频编码</span><span class="chip">图像识别</span></div>
+  </section>
+
+  <section class="proj-block" id="audio">
+    <div class="proj-top"><span class="tag">系统诊断</span><span class="status">探索阶段</span></div>
+    <h2>Windows 音频状态监测与事件追踪</h2>
+    <p>针对「音量莫名变化」这类难复现的现场问题，探索音频设备状态与静音事件的监测工具：周期性记录静音与音量状态变化的时间点，尝试关联触发变化的应用程序或进程，支持后台运行与本地日志。</p>
+    <p>事件归因（到底是哪个进程动了音量）是这一项目遇到的主要技术难点，目前以状态记录与时间线对比为主。</p>
+    <div class="stack-row"><span class="chip">Python</span><span class="chip">pycaw</span><span class="chip">comtypes</span><span class="chip">Core Audio API</span></div>
+  </section>
+
+  <section class="cta">
+    <div>
+      <h3>项目文档会持续补齐</h3>
+      <p>如果你的环境和这里某一条对得上，欢迎对照自己的现象核对一遍。</p>
+    </div>
+    <a class="btn btn-primary" href="notes.html">看笔记 →</a>
+  </section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span>
+  <a href="about.html">关于本站</a>
+  <span>静态托管 · 无广告 · 无追踪</span>
+</footer>
+<div class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

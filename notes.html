@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Jeff 的技术笔记：黑苹果排障记录、CPU 睿频调优、驱动构建、Wi-Fi 与触摸板自动化，以及运维相关的实践记录。">
+<title>笔记 · Jeff 的技术站</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">跳转到正文</a>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术站<small>SUPPORT · DEVELOPMENT · OPERATIONS</small></span></a>
+  <nav class="top-nav" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="projects.html">项目</a>
+    <a href="notes.html" aria-current="page">笔记</a>
+    <a href="about.html">关于</a>
+    <a href="https://github.com/EnormousKnob" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </nav>
+  <button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开导航">☰</button>
+</header>
+
+<main id="main" tabindex="-1">
+<div class="wrap page">
+  <p class="eyebrow"><span class="orange-line"></span> NOTES / 07 篇</p>
+  <h1 class="page-title">技术笔记</h1>
+  <p class="page-lede">按「现象 → 收集信息 → 判断 → 处理 → 预防」的结构写。不追求覆盖所有情况，但要求每条结论都能被复现或被证伪。</p>
+
+  <div class="sec-head">
+    <h2>专题 01 · Hackintosh 实践</h2>
+    <span>HP ZBook Power G10 · 6 篇</span>
+  </div>
+  <section class="note-rows" aria-label="Hackintosh 笔记">
+    <a class="note-row" href="overview.html"><span class="idx">01</span><span class="ttl">项目全记录：从硬件配置到驱动清单</span><span class="meta">项目总览 · 17 分钟</span></a>
+    <a class="note-row" href="hardware.html"><span class="idx">02</span><span class="ttl">硬件支持与已知限制</span><span class="meta">兼容性 · 4 分钟</span></a>
+    <a class="note-row" href="display.html"><span class="idx">03</span><span class="ttl">内屏黑屏：从 AUX 超时到 eDP keep</span><span class="meta">故障排查 · 5 分钟</span></a>
+    <a class="note-row" href="cpu.html"><span class="idx">04</span><span class="ttl">CPU 睿频：打开上限之后</span><span class="meta">性能调优 · 7 分钟</span></a>
+    <a class="note-row" href="build.html"><span class="idx">05</span><span class="ttl">从源码构建 WhateverXe</span><span class="meta">构建部署 · 5 分钟</span></a>
+    <a class="note-row" href="wifi.html"><span class="idx">06</span><span class="ttl">Wi-Fi 自愈与触摸板排障</span><span class="meta">自动化 · 2 分钟</span></a>
+    <a class="note-row" href="files.html"><span class="idx">07</span><span class="ttl">项目文件：EFI、SSDT 与脚本下载</span><span class="meta">资源 · 直接获取</span></a>
+  </section>
+
+  <div class="sec-head">
+    <h2>专题 02 · 工具与监控</h2>
+    <span>整理中</span>
+  </div>
+  <section class="note-rows" aria-label="工具笔记">
+    <span class="note-row" style="cursor:default;color:var(--muted)"><span class="idx">08</span><span class="ttl">SNMP 打印机监控：从读 OID 到节假日告警策略</span><span class="meta">计划中</span></span>
+    <span class="note-row" style="cursor:default;color:var(--muted)"><span class="idx">09</span><span class="ttl">企业微信缓存清理：目录识别与安全边界</span><span class="meta">计划中</span></span>
+    <span class="note-row" style="cursor:default;color:var(--muted)"><span class="idx">10</span><span class="ttl">用 Zabbix Trapper 收终端指标</span><span class="meta">计划中</span></span>
+    <span class="note-row" style="cursor:default;color:var(--muted)"><span class="idx">11</span><span class="ttl">HP 驱动仓库：全量初始化与增量更新</span><span class="meta">计划中</span></span>
+    <span class="note-row" style="cursor:default;color:var(--muted)"><span class="idx">12</span><span class="ttl">批量装机的四个坑</span><span class="meta">计划中</span></span>
+  </section>
+
+  <section class="cta">
+    <div>
+      <h3>想先看哪一篇？</h3>
+      <p>告诉我你遇到的场景，优先级按实际需求排，不按我写得顺手的顺序排。</p>
+    </div>
+    <a class="btn btn-primary" href="https://github.com/EnormousKnob" target="_blank" rel="noopener noreferrer">提一个话题 ↗</a>
+  </section>
+</div>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span>
+  <a href="about.html">关于本站</a>
+  <span>静态托管 · 无广告 · 无追踪</span>
+</footer>
+<div class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
