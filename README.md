@@ -23,6 +23,7 @@ IT 支持 / 开发 / 运维方向的个人站点。纯静态站点：无构建�
 | `images/` | 卡通小狗 SVG + 真实照片 | 换图直接替换同名文件 |
 | `search-index.json` | 文档页搜索用的索引 | 新增文档后需手动补条目 |
 | `_headers` | Cloudflare 响应头（安全头 + 图片缓存） | 一般不用动 |
+| `wrangler.jsonc` | Cloudflare Workers 部署配置（`name` 必须与线上 Worker 名一致；`not_found_handling` 启用自定义 404 页） | 改 Worker 名时才动 |
 | `source-*` | 从 [zbook-g10-hackintosh](https://github.com/EnormousKnob/zbook-g10-hackintosh) 同步的原始文档、SSDT、config.plist、脚本 | **不要手改**，等上游更新后重新同步 |
 
 ---
