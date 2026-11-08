@@ -1,0 +1,195 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>硬件支持与已知限制 · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" ><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" aria-current="page" class="selected"><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" ><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" ><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" ><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><div class="breadcrumb"><a href="index.html">知识库</a><span>/</span><a href="overview.html">Hackintosh 实践</a><span>/</span>兼容性</div><div class="article-meta"><span class="tag">兼容性</span><span>4 分钟阅读 · 2026.11.08</span></div><div class="article-source-note">项目记录 · 适用范围与状态以原文为准，操作前请先阅读<a href="hardware.html">已知限制</a>。</div><article class="prose"><h1 id="硬件支持与已知限制">硬件支持与已知限制</h1>
+<p>摘录自项目 README，状态仅对应作者记录的这台机器。</p>
+<h2 id="1-机器配置">1. 机器配置</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规格</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>机型</td>
+<td>HP ZBook Power G10（移动工作站）</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>Intel Core i7-13700H（6P + 8E，20 线程）</td>
+</tr>
+<tr>
+<td>核显</td>
+<td>Intel Iris Xe / UHD Graphics，Device ID <code>0xA720</code></td>
+</tr>
+<tr>
+<td>内存</td>
+<td>16 GB</td>
+</tr>
+<tr>
+<td>硬盘</td>
+<td>Samsung MZVL2512HCJQ（512 GB NVMe，PM9A1）</td>
+</tr>
+<tr>
+<td>屏幕</td>
+<td>1920×1080 eDP 内屏（无独显）</td>
+</tr>
+<tr>
+<td>系统</td>
+<td>macOS 26.7.1（Build 25G241，Tahoe）</td>
+</tr>
+<tr>
+<td>引导</td>
+<td>OpenCore 1.0.9（DBG-109-2026-10-23）</td>
+</tr>
+<tr>
+<td>SMBIOS</td>
+<td>MacBookPro16,2</td>
+</tr>
+</tbody></table></div>
+<h2 id="3-硬件支持总表">3. 硬件支持总表</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>硬件</th>
+<th>型号 / ID</th>
+<th>状态</th>
+<th>实现方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU</td>
+<td>i7-13700H</td>
+<td>✅ 20 线程（6P/8E 拓扑修正），单核睿频约 3.7–3.9GHz</td>
+<td><code>CpuTopologyRebuild</code> + <code>SSDT-PLUG-ALT</code> + <code>CPUFriend</code>（见 <a href="overview.html#56-cpu-睿频被-smbios-借用的频率表">§5.6</a>）</td>
+</tr>
+<tr>
+<td>核显</td>
+<td>UHD <code>0xA720</code></td>
+<td>✅ Metal 2，VRAM 1536 MB</td>
+<td><code>WhateverXe</code> 0.7.0 + <code>AppleIntelTGLCompat</code></td>
+</tr>
+<tr>
+<td><strong>内屏</strong></td>
+<td>1920×1080 eDP</td>
+<td>✅ 点亮（关键：<code>-wex-edp-keep</code>）</td>
+<td>见 <a href="overview.html#51-内屏edp点亮最大的坑">§5.1</a></td>
+</tr>
+<tr>
+<td>触摸板</td>
+<td>ELAN07BB（I2C HID）</td>
+<td>✅ 顺滑（轮询模式）</td>
+<td><code>VoodooI2C</code> 2.9.1 + <code>VoodooI2CHID</code> + <code>-vi2c-force-polling</code></td>
+</tr>
+<tr>
+<td>键盘</td>
+<td>PS/2</td>
+<td>✅ 含亮度键</td>
+<td><code>VoodooPS2Controller</code> 2.3.8 + <code>BrightnessKeys</code></td>
+</tr>
+<tr>
+<td>Wi-Fi</td>
+<td>Intel Wi-Fi 6E AX211（<code>8086:51ef</code>，CNVi）</td>
+<td>✅ 自动连接</td>
+<td><code>AirportItlwm</code> 2.4.0 + 开机守护脚本</td>
+</tr>
+<tr>
+<td>蓝牙</td>
+<td>Intel AX211 BT（USB <code>8087:0033</code>）</td>
+<td>✅ 可用</td>
+<td><code>IntelBluetoothFirmware</code> + <code>IntelBTPatcher</code> + <code>BlueToolFixup</code></td>
+</tr>
+<tr>
+<td>有线网卡</td>
+<td>Intel I219-LM（<code>8086:51a4</code>）</td>
+<td>✅ 可用</td>
+<td><code>IntelMausiEthernet</code> 3.0.3</td>
+</tr>
+<tr>
+<td>音频</td>
+<td>板载（VoodooHDA）</td>
+<td>✅ 扬声器 + 耳机口</td>
+<td><code>VoodooHDA</code> 3.0.2（Tahoe 无 AppleHDA，AppleALC 不可用）</td>
+</tr>
+<tr>
+<td>电池</td>
+<td>智能电池</td>
+<td>✅ 电量/循环次数正常</td>
+<td><code>SMCBatteryManager</code> + <code>ECEnabler</code></td>
+</tr>
+<tr>
+<td>存储</td>
+<td>NVMe</td>
+<td>⚠️ 可用，偶发写超时死机（硬件问题）</td>
+<td><code>NVMeFix</code> 1.1.4</td>
+</tr>
+<tr>
+<td>摄像头</td>
+<td>HP HD Camera（UVC <code>1480:2822</code>）</td>
+<td>✅ 原生免驱</td>
+<td>macOS 原生 UVC</td>
+</tr>
+<tr>
+<td>USB</td>
+<td>—</td>
+<td>✅ 端口定制正常</td>
+<td><code>USBToolBox</code> + <code>UTBDefault</code> + <code>SSDT-USBX</code></td>
+</tr>
+<tr>
+<td>读卡器</td>
+<td>Card Reader</td>
+<td>⚠️ 未验证/未驱动</td>
+<td>—</td>
+</tr>
+<tr>
+<td>指纹识别</td>
+<td>—</td>
+<td>❌ 无解（macOS 不支持第三方指纹）</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>睡眠</strong></td>
+<td>—</td>
+<td>❌ 主动禁用</td>
+<td>见 <a href="overview.html#6-已知限制">§6</a></td>
+</tr>
+</tbody></table></div>
+<h2 id="6-已知限制">6. 已知限制</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>限制</th>
+<th>说明</th>
+<th>规避</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>睡眠 / 关屏 / 切换分辨率</strong></td>
+<td>会触发完整 modeset → 内屏黑到下次重启</td>
+<td>电源设置里关闭睡眠；不要手动关屏或改分辨率</td>
+</tr>
+<tr>
+<td>NVMe 偶发死机</td>
+<td>Samsung PM991a/PM9A1 写超时（Windows 下也有报告），非 macOS 问题</td>
+<td>减少强制断电；重要数据勤备份</td>
+</tr>
+<tr>
+<td>CPU 持续频率</td>
+<td>睿频上限已开到 5.0GHz，但实测持续约 3.7–3.9GHz（伪装 CPUID 导致）</td>
+<td>无（见 <a href="overview.html#56-cpu-睿频被-smbios-借用的频率表">§5.6</a>）</td>
+</tr>
+<tr>
+<td>读卡器</td>
+<td>未验证</td>
+<td>用 USB 读卡器</td>
+</tr>
+<tr>
+<td>指纹</td>
+<td>macOS 无第三方指纹驱动</td>
+<td>—</td>
+</tr>
+<tr>
+<td>系统升级</td>
+<td>大版本升级可能破坏驱动栈</td>
+<td>升级前备份 EFI</td>
+</tr>
+</tbody></table></div>
+</article><div class="article-end"><span>记录来源：EnormousKnob/zbook-g10-hackintosh</span><a href="files.html">查看配置与脚本 →</a></div></main><aside class="right-rail"><div class="toc"><p class="eyebrow">ON THIS PAGE</p><h3>本页目录</h3><a href="#1-机器配置">1. 机器配置</a><a href="#3-硬件支持总表">3. 硬件支持总表</a><a href="#6-已知限制">6. 已知限制</a></div><div class="rail-source"><a href="source-README.md" download>下载原始 Markdown ↓</a><p>内容快照 · 2026.11.08</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/blob/8d82ccede59dbaedd293be48a9fbbe55233f8ebf/README.md">查看 GitHub 原文 ↗</a></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>

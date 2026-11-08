@@ -1,0 +1,605 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>HP ZBook Power G10 · 项目全记录 · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" aria-current="page" class="selected"><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" ><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" ><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" ><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" ><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><div class="breadcrumb"><a href="index.html">知识库</a><span>/</span><a href="overview.html">Hackintosh 实践</a><span>/</span>项目总览</div><div class="article-meta"><span class="tag">项目总览</span><span>17 分钟阅读 · 2026.11.08</span></div><div class="article-source-note">项目记录 · 适用范围与状态以原文为准，操作前请先阅读<a href="hardware.html">已知限制</a>。</div><article class="prose"><h1 id="hp-zbook-power-g10--macos-26-tahoe-黑苹果">HP ZBook Power G10 · macOS 26 Tahoe 黑苹果</h1>
+<p>HP ZBook Power G10（i7-13700H / Raptor Lake-H）在 macOS 26.7.1 上的完整可用配置记录：<strong>每一项硬件当前能不能用、靠什么实现、遇到什么问题、怎么解决的</strong>。</p>
+<p>内屏（eDP）、触摸板、Wi-Fi、蓝牙、音频、电池、摄像头、USB 全部可用；睡眠不可用（原因与取舍见下文）。</p>
+<hr>
+<h2 id="1-机器配置">1. 机器配置</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规格</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>机型</td>
+<td>HP ZBook Power G10（移动工作站）</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>Intel Core i7-13700H（6P + 8E，20 线程）</td>
+</tr>
+<tr>
+<td>核显</td>
+<td>Intel Iris Xe / UHD Graphics，Device ID <code>0xA720</code></td>
+</tr>
+<tr>
+<td>内存</td>
+<td>16 GB</td>
+</tr>
+<tr>
+<td>硬盘</td>
+<td>Samsung MZVL2512HCJQ（512 GB NVMe，PM9A1）</td>
+</tr>
+<tr>
+<td>屏幕</td>
+<td>1920×1080 eDP 内屏（无独显）</td>
+</tr>
+<tr>
+<td>系统</td>
+<td>macOS 26.7.1（Build 25G241，Tahoe）</td>
+</tr>
+<tr>
+<td>引导</td>
+<td>OpenCore 1.0.9（DBG-109-2026-10-23）</td>
+</tr>
+<tr>
+<td>SMBIOS</td>
+<td>MacBookPro16,2</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-系统截图">2. 系统截图</h2>
+<blockquote>
+<p>截图中的序列号 / UUID / 用户名 / Wi-Fi 名称已做模糊处理。</p>
+</blockquote>
+<details>
+<summary><b>点开查看截图</b></summary>
+
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img loading="lazy" decoding="async" src="about-this-mac.png" alt="硬件概览"></td>
+<td><img loading="lazy" decoding="async" src="displays.png" alt="显示器"></td>
+</tr>
+<tr>
+<td><em>系统信息 · 硬件概览（i7-13700H / 16GB / UHD 1536MB）</em></td>
+<td><em>显示器 · 内屏 1920×1080 60Hz 正常输出</em></td>
+</tr>
+<tr>
+<td><img loading="lazy" decoding="async" src="trackpad.png" alt="触控板"></td>
+<td><img loading="lazy" decoding="async" src="bluetooth.png" alt="蓝牙"></td>
+</tr>
+<tr>
+<td><em>触控板 · ELAN07BB 经 VoodooI2C 正常识别</em></td>
+<td><em>蓝牙 · Intel AX211 蓝牙可用</em></td>
+</tr>
+<tr>
+<td><img loading="lazy" decoding="async" src="wifi.png" alt="Wi-Fi"></td>
+<td><img loading="lazy" decoding="async" src="sound.png" alt="声音"></td>
+</tr>
+<tr>
+<td><em>Wi-Fi · AX211 已连接</em></td>
+<td><em>声音 · VoodooHDA 扬声器/耳机</em></td>
+</tr>
+<tr>
+<td><img loading="lazy" decoding="async" src="terminal-proof.png" alt="终端验证"></td>
+<td></td>
+</tr>
+<tr>
+<td><em>终端验证 · 驱动版本 / edp-keep 4/4 / boot-args</em></td>
+<td></td>
+</tr>
+</tbody></table></div>
+</details>
+
+<hr>
+<h2 id="3-硬件支持总表">3. 硬件支持总表</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>硬件</th>
+<th>型号 / ID</th>
+<th>状态</th>
+<th>实现方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU</td>
+<td>i7-13700H</td>
+<td>✅ 20 线程（6P/8E 拓扑修正），单核睿频约 3.7–3.9GHz</td>
+<td><code>CpuTopologyRebuild</code> + <code>SSDT-PLUG-ALT</code> + <code>CPUFriend</code>（见 <a href="#56-cpu-睿频被-smbios-借用的频率表">§5.6</a>）</td>
+</tr>
+<tr>
+<td>核显</td>
+<td>UHD <code>0xA720</code></td>
+<td>✅ Metal 2，VRAM 1536 MB</td>
+<td><code>WhateverXe</code> 0.7.0 + <code>AppleIntelTGLCompat</code></td>
+</tr>
+<tr>
+<td><strong>内屏</strong></td>
+<td>1920×1080 eDP</td>
+<td>✅ 点亮（关键：<code>-wex-edp-keep</code>）</td>
+<td>见 <a href="#51-内屏edp点亮最大的坑">§5.1</a></td>
+</tr>
+<tr>
+<td>触摸板</td>
+<td>ELAN07BB（I2C HID）</td>
+<td>✅ 顺滑（轮询模式）</td>
+<td><code>VoodooI2C</code> 2.9.1 + <code>VoodooI2CHID</code> + <code>-vi2c-force-polling</code></td>
+</tr>
+<tr>
+<td>键盘</td>
+<td>PS/2</td>
+<td>✅ 含亮度键</td>
+<td><code>VoodooPS2Controller</code> 2.3.8 + <code>BrightnessKeys</code></td>
+</tr>
+<tr>
+<td>Wi-Fi</td>
+<td>Intel Wi-Fi 6E AX211（<code>8086:51ef</code>，CNVi）</td>
+<td>✅ 自动连接</td>
+<td><code>AirportItlwm</code> 2.4.0 + 开机守护脚本</td>
+</tr>
+<tr>
+<td>蓝牙</td>
+<td>Intel AX211 BT（USB <code>8087:0033</code>）</td>
+<td>✅ 可用</td>
+<td><code>IntelBluetoothFirmware</code> + <code>IntelBTPatcher</code> + <code>BlueToolFixup</code></td>
+</tr>
+<tr>
+<td>有线网卡</td>
+<td>Intel I219-LM（<code>8086:51a4</code>）</td>
+<td>✅ 可用</td>
+<td><code>IntelMausiEthernet</code> 3.0.3</td>
+</tr>
+<tr>
+<td>音频</td>
+<td>板载（VoodooHDA）</td>
+<td>✅ 扬声器 + 耳机口</td>
+<td><code>VoodooHDA</code> 3.0.2（Tahoe 无 AppleHDA，AppleALC 不可用）</td>
+</tr>
+<tr>
+<td>电池</td>
+<td>智能电池</td>
+<td>✅ 电量/循环次数正常</td>
+<td><code>SMCBatteryManager</code> + <code>ECEnabler</code></td>
+</tr>
+<tr>
+<td>存储</td>
+<td>NVMe</td>
+<td>⚠️ 可用，偶发写超时死机（硬件问题）</td>
+<td><code>NVMeFix</code> 1.1.4</td>
+</tr>
+<tr>
+<td>摄像头</td>
+<td>HP HD Camera（UVC <code>1480:2822</code>）</td>
+<td>✅ 原生免驱</td>
+<td>macOS 原生 UVC</td>
+</tr>
+<tr>
+<td>USB</td>
+<td>—</td>
+<td>✅ 端口定制正常</td>
+<td><code>USBToolBox</code> + <code>UTBDefault</code> + <code>SSDT-USBX</code></td>
+</tr>
+<tr>
+<td>读卡器</td>
+<td>Card Reader</td>
+<td>⚠️ 未验证/未驱动</td>
+<td>—</td>
+</tr>
+<tr>
+<td>指纹识别</td>
+<td>—</td>
+<td>❌ 无解（macOS 不支持第三方指纹）</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>睡眠</strong></td>
+<td>—</td>
+<td>❌ 主动禁用</td>
+<td>见 <a href="#6-已知限制">§6</a></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="4-项目结构">4. 项目结构</h2>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code>.
+├── README.md
+├── docs/
+│   ├── internal-display-fix.md    # 内屏修复的技术细节（AUX 超时 / DPCD / edp-keep）
+│   ├── build-from-source.md       # 从源码构建 edp-keep 版驱动（含补丁与部署流程）
+│   ├── cpu-turbo.md               # CPU 睿频：频率表借用、CPUFriend 与实测数据
+│   └── images/                    # 系统截图
+├── efi/
+│   └── OC/
+│       ├── config.plist           # 已清除序列号的公开版本
+│       └── ACPI/                  # 10 个 SSDT
+└── scripts/
+    ├── wifi-fix.sh                # 开机 Wi-Fi 自愈脚本
+    └── com.jeff.wififix.plist     # 对应 LaunchDaemon
+</code></pre></div>
+<blockquote>
+<p>本仓库<strong>不包含</strong>第三方 kext 二进制文件，只列版本与来源（见 <a href="#7-kext-清单">§7</a>）。请从各项目官方 Release 下载。</p>
+</blockquote>
+<hr>
+<h2 id="5-关键实现说明">5. 关键实现说明</h2>
+<h3 id="51-内屏edp点亮最大的坑">5.1 内屏（eDP）点亮：最大的坑</h3>
+<p><strong>症状</strong>：开机跑码阶段内屏正常显示，macOS 驱动接管瞬间变黑；手电筒照屏幕<strong>有背光、无画面</strong>，外接显示器正常。</p>
+<p><strong>诊断结论</strong>（完整证据链见 <a href="display.html">docs/internal-display-fix.md</a>）：</p>
+<ul>
+<li>面板本身健康：DPCD 可读，AUX 背光模式寄存器已锁存，亮度值正常</li>
+<li>内核日志：<code>FB0: Hardware mode set failed, err = 0xe00002d8</code>（AUX 重试耗尽）</li>
+<li>即：<strong>驱动重新训练 eDP 链路时 AUX 事务全部超时</strong>，而固件在开机时已经训练好了这条链路</li>
+</ul>
+<p><strong>解决方案</strong>：启用 <code>-wex-edp-keep</code>（来自 WhateverXe 上游 <a href="https://github.com/b00t0x/WhateverXe/issues/43">issue #43</a> 的社区方案，nickk19 的 fork）。</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-diff"># boot-args
+- amfi_get_out_of_my_way=1 msgbuf=1048576 -v
++ amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep
+</code></pre></div>
+<p>原理：驱动检测到固件已训练好的链路时，回答 <code>Partial modeset</code>，<strong>断开重训改为复用现成链路</strong>，链路不断、画面不掉。</p>
+<p><strong>验证</strong>：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">ioreg -l | grep WEXEDPKeep
+# &quot;WEXEDPKeep&quot; = &lt;01000000040000000400000000...&gt;
+#  version=1  call=4  kept=4（4 次 modeset 全部被拦为 Partial）
+</code></pre></div>
+<p>日志中不再出现 <code>Hardware mode set failed</code>，内屏点亮且 Metal 加速正常。</p>
+<h3 id="52-触摸板突停突跳">5.2 触摸板：突停突跳</h3>
+<p><strong>症状</strong>：光标移动时突然卡住，然后一次跳到很远处。</p>
+<ul>
+<li>触摸板型号 ELAN07BB，走 I2C HID（<code>VoodooI2C</code>），默认使用 GPIO 中断（<code>gpioPin 323</code>）</li>
+<li>HP 机型的 GPIO 中断不可靠：中断丢失 → 事件在驱动里积压 → 恢复时一次性涌出</li>
+<li>日志里没有任何 I2C 错误，因为链路本身没坏，坏的是“通知机制”</li>
+</ul>
+<p><strong>解决</strong>：强制轮询模式</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-diff">- amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep
++ amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep -vi2c-force-polling
+</code></pre></div>
+<p>代价是极小的 CPU 占用（8 ms 报告周期），换来完全稳定的手感。</p>
+<h3 id="53-wi-fi重启后必须手动开关">5.3 Wi-Fi：重启后必须手动开关</h3>
+<p><strong>症状</strong>：每次重启后 Wi-Fi 图标是灰的，手动关一下再开就正常。</p>
+<p><strong>根因</strong>：<code>airportd</code> 在 <code>itlwm</code> 接口就绪<strong>之前</strong>启动，初始化失败后不再重试；手动开关等于变相重启 <code>airportd</code>。</p>
+<p><strong>解决</strong>：开机守护，检测接口状态，必要时重启 <code>airportd</code>（见 <code>scripts/</code>）。</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">sudo cp scripts/wifi-fix.sh /usr/local/bin/wifi-fix.sh
+sudo chmod 755 /usr/local/bin/wifi-fix.sh
+sudo cp scripts/com.jeff.wififix.plist /Library/LaunchDaemons/
+sudo chown root:wheel /Library/LaunchDaemons/com.jeff.wififix.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.jeff.wififix.plist
+</code></pre></div>
+<h3 id="54-音频voodoohda-而非-applealc">5.4 音频：VoodooHDA 而非 AppleALC</h3>
+<p>macOS Tahoe 移除了 <code>AppleHDA.kext</code>，<code>AppleALC</code> 无法直接工作，改用 <code>VoodooHDA</code>。
+安装后需在「系统设置 → 声音 → 输出」选择 <strong>Speaker (Analog)</strong>。</p>
+<h3 id="55-蓝牙">5.5 蓝牙</h3>
+<p>Intel AX211 的蓝牙走 USB，需要三个 kext 配合：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>Kext</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>IntelBluetoothFirmware</code> 2.5.2</td>
+<td>上传 Intel 固件</td>
+</tr>
+<tr>
+<td><code>IntelBTPatcher</code> 2.5.2</td>
+<td>修补 Intel 蓝牙协议栈</td>
+</tr>
+<tr>
+<td><code>BlueToolFixup</code> 2.7.3</td>
+<td>修复 macOS 12+ 蓝牙工具链</td>
+</tr>
+</tbody></table></div>
+<h3 id="56-cpu-睿频被-smbios-借用的频率表">5.6 CPU 睿频：被 SMBIOS 借用的频率表</h3>
+<p><strong>症状</strong>：「关于本机」显示 2.92GHz，满载实测封顶 <strong>3.8GHz</strong>（i7-13700H 规格单核 5.0GHz）。</p>
+<p><strong>根因</strong>：SMBIOS 用 <code>MacBookPro16,2</code>，macOS 于是加载该机型资源表
+<code>Mac-5F9802EFE386AA28.plist</code>——它属于 <strong>Ice Lake i7-1068NG7</strong>（规格恰好全核 3.8 / 单核 4.1GHz），
+XCPM 的 <code>hard_plimit_max_100mhz_ratio</code> 被压在 <strong>38</strong>（3.8GHz）。黑苹果上 CPU 未被真正识别，
+macOS 只能照抄别人的频率表。</p>
+<p><strong>解决</strong>：<code>CPUFriend</code> + 定制 <code>CPUFriendDataProvider</code>，把频率表换成规格最接近的
+<code>MacBookPro16,1</code>（i9-9980HK，P 核 2.4GHz 基频 / 5.0GHz 睿频）的版本——新增 4300/4600/5000 三档：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash"># 1. CPUFriend 官方 Tools 里转换资源表
+sh Tools/ResourceConverter.sh --kext Mac-AA95B1DDAB278B95.plist   # 产出 CPUFriendDataProvider.kext
+# 2. 两个 kext 进 EFI/OC/Kexts，config 的 Kernel → Add 里排在 Lilu 之后
+# 3. 关键：macOS 26 属于 CPUFriend 未声明支持的版本，必须加 -cpufbeta
+</code></pre></div>
+<blockquote>
+<p>⚠️ <strong>最容易踩的坑</strong>：不加 <code>-cpufbeta</code> 时 RELEASE 版 CPUFriend <strong>静默不加载数据</strong>，
+表现是 kext 已在 <code>kextstat</code> 里、但频率表毫无变化，极难察觉。判定方法：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">ioreg -l -n X86PlatformPlugin | grep -o &#39;&quot;Frequencies&quot;={[^}]*}&#39;
+# 生效前：{&quot;4100&quot;=1,&quot;3800&quot;=1}      生效后：{&quot;4300&quot;=1,&quot;4600&quot;=2,&quot;5000&quot;=3,&quot;4100&quot;=0}
+sysctl machdep.xcpm.hard_plimit_max_100mhz_ratio   # 38 → 50（=5.0GHz）
+</code></pre></div>
+</blockquote>
+<p><strong>效果与残留</strong>：macOS 侧上限已开到 5.0GHz（硬限制 ratio 50、AC 供电、无热警告、封装功耗仅 13W），
+但实测<strong>持续</strong>频率仍在 ~3.7–3.9GHz（自写 AVX2 FMA 基准 ≈111 GFLOPS 交叉验证，非显示误差）。
+推断瓶颈在更底层——<code>Cpuid1Data</code> 把 CPU 伪装成 <code>0x000A0655</code>（Comet Lake）后，HWP/EPP 层
+仍按伪装的机型调频。深调（DEBUG 版 CPUFriend + EPP 注入 / 换仿冒 ID）风险高、收益不确定，
+本项目保持现状。详细测量过程见 <a href="cpu.html">docs/cpu-turbo.md</a>。</p>
+<hr>
+<h2 id="6-已知限制">6. 已知限制</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>限制</th>
+<th>说明</th>
+<th>规避</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>睡眠 / 关屏 / 切换分辨率</strong></td>
+<td>会触发完整 modeset → 内屏黑到下次重启</td>
+<td>电源设置里关闭睡眠；不要手动关屏或改分辨率</td>
+</tr>
+<tr>
+<td>NVMe 偶发死机</td>
+<td>Samsung PM991a/PM9A1 写超时（Windows 下也有报告），非 macOS 问题</td>
+<td>减少强制断电；重要数据勤备份</td>
+</tr>
+<tr>
+<td>CPU 持续频率</td>
+<td>睿频上限已开到 5.0GHz，但实测持续约 3.7–3.9GHz（伪装 CPUID 导致）</td>
+<td>无（见 <a href="#56-cpu-睿频被-smbios-借用的频率表">§5.6</a>）</td>
+</tr>
+<tr>
+<td>读卡器</td>
+<td>未验证</td>
+<td>用 USB 读卡器</td>
+</tr>
+<tr>
+<td>指纹</td>
+<td>macOS 无第三方指纹驱动</td>
+<td>—</td>
+</tr>
+<tr>
+<td>系统升级</td>
+<td>大版本升级可能破坏驱动栈</td>
+<td>升级前备份 EFI</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-kext-清单">7. Kext 清单</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>Kext</th>
+<th>版本</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Lilu</td>
+<td>1.7.3</td>
+<td><a href="https://github.com/acidanthera/Lilu">acidanthera/Lilu</a></td>
+</tr>
+<tr>
+<td>WhateverXe</td>
+<td>0.7.0</td>
+<td><a href="https://github.com/b00t0x/WhateverXe">b00t0x/WhateverXe</a></td>
+</tr>
+<tr>
+<td>AppleIntelTGLCompat</td>
+<td>0.7.0</td>
+<td>同上（PlugIn）</td>
+</tr>
+<tr>
+<td>VirtualSMC / SMCProcessor / SMCSuperIO / SMCBatteryManager / SMCLightSensor</td>
+<td>1.3.9</td>
+<td><a href="https://github.com/acidanthera/VirtualSMC">acidanthera/VirtualSMC</a></td>
+</tr>
+<tr>
+<td>CpuTopologyRebuild</td>
+<td>2.0.2</td>
+<td><a href="https://github.com/b00t0x/CpuTopologyRebuild">b00t0x/CpuTopologyRebuild</a></td>
+</tr>
+<tr>
+<td>CPUFriend / CPUFriendDataProvider</td>
+<td>1.2.9</td>
+<td><a href="https://github.com/acidanthera/CPUFriend">acidanthera/CPUFriend</a>（自制 DataProvider）</td>
+</tr>
+<tr>
+<td>AMFIPass</td>
+<td>1.4.1</td>
+<td><a href="https://github.com/dhinakg/AMFIPass">dhinakg/AMFIPass</a></td>
+</tr>
+<tr>
+<td>RestrictEvents</td>
+<td>1.1.7</td>
+<td><a href="https://github.com/acidanthera/RestrictEvents">acidanthera/RestrictEvents</a></td>
+</tr>
+<tr>
+<td>NVMeFix</td>
+<td>1.1.4</td>
+<td><a href="https://github.com/acidanthera/NVMeFix">acidanthera/NVMeFix</a></td>
+</tr>
+<tr>
+<td>ECEnabler</td>
+<td>1.0.6</td>
+<td><a href="https://github.com/1Revenger1/ECEnabler">1Revenger1/ECEnabler</a></td>
+</tr>
+<tr>
+<td>VoodooPS2Controller</td>
+<td>2.3.8</td>
+<td><a href="https://github.com/acidanthera/VoodooPS2">acidanthera/VoodooPS2</a></td>
+</tr>
+<tr>
+<td>VoodooI2C / VoodooI2CHID / VoodooGPIO / VoodooI2CServices</td>
+<td>2.9.1</td>
+<td><a href="https://github.com/VoodooI2C/VoodooI2C">VoodooI2C/VoodooI2C</a></td>
+</tr>
+<tr>
+<td>VoodooInput</td>
+<td>1.1.7</td>
+<td><a href="https://github.com/kishorprins/VoodooInput">kishorprins/VoodooInput</a></td>
+</tr>
+<tr>
+<td>BrightnessKeys</td>
+<td>1.0.4</td>
+<td><a href="https://github.com/acidanthera/BrightnessKeys">acidanthera/BrightnessKeys</a></td>
+</tr>
+<tr>
+<td>AirportItlwm</td>
+<td>2.4.0</td>
+<td><a href="https://github.com/OpenIntelWireless/itlwm">OpenIntelWireless/itlwm</a></td>
+</tr>
+<tr>
+<td>IntelBluetoothFirmware / IntelBTPatcher</td>
+<td>2.5.2</td>
+<td><a href="https://github.com/OpenIntelWireless/IntelBluetoothFirmware">OpenIntelWireless/IntelBluetoothFirmware</a></td>
+</tr>
+<tr>
+<td>BlueToolFixup</td>
+<td>2.7.3</td>
+<td><a href="https://github.com/acidanthera/BrcmPatchRAM">acidanthera/BrcmPatchRAM</a></td>
+</tr>
+<tr>
+<td>IntelMausiEthernet</td>
+<td>3.0.3</td>
+<td><a href="https://github.com/Mieze/IntelMausiEthernet">Mieze/IntelMausiEthernet</a></td>
+</tr>
+<tr>
+<td>VoodooHDA</td>
+<td>3.0.2</td>
+<td><a href="https://github.com/chris1111">chris1111/VoodooHDA-Tahoe</a></td>
+</tr>
+<tr>
+<td>USBToolBox / UTBDefault</td>
+<td>1.2.0</td>
+<td><a href="https://github.com/USBToolBox/kext">USBToolBox</a></td>
+</tr>
+</tbody></table></div>
+<h2 id="8-ssdt-清单">8. SSDT 清单</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>SSDT</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SSDT-PLUG-ALT</code></td>
+<td>CPU 电源管理（<code>plugin-type</code>）</td>
+</tr>
+<tr>
+<td><code>SSDT-EC</code></td>
+<td>假嵌入式控制器，避免与真 EC 冲突</td>
+</tr>
+<tr>
+<td><code>SSDT-SBUS</code></td>
+<td>SBUS / SMBus 补全</td>
+</tr>
+<tr>
+<td><code>SSDT-MCHC</code></td>
+<td>内存控制器设备节点</td>
+</tr>
+<tr>
+<td><code>SSDT-PNLF</code></td>
+<td>背光控制设备（配合 WhateverXe 亮度）</td>
+</tr>
+<tr>
+<td><code>SSDT-GPI0</code></td>
+<td>GPIO 控制器（触摸板中断/轮询）</td>
+</tr>
+<tr>
+<td><code>SSDT-XOSI</code></td>
+<td>操作系统判断兼容</td>
+</tr>
+<tr>
+<td><code>SSDT-RTCAWAC</code></td>
+<td>RTC 与 AWAC 时钟</td>
+</tr>
+<tr>
+<td><code>SSDT-USBX</code></td>
+<td>USB 供电属性</td>
+</tr>
+<tr>
+<td><code>SSDT-USB-Reset</code></td>
+<td>USB 端口复位</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-boot-args-逐项说明">9. boot-args 逐项说明</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-v</code></td>
+<td>详细模式（保留，便于排障）</td>
+</tr>
+<tr>
+<td><code>msgbuf=1048576</code></td>
+<td>扩大内核日志缓冲（1 MB）</td>
+</tr>
+<tr>
+<td><code>amfi_get_out_of_my_way=1</code></td>
+<td>AMFI 宽松模式（AMFIPass 需要）</td>
+</tr>
+<tr>
+<td><code>IGLogLevel=3</code></td>
+<td>核显驱动日志等级</td>
+</tr>
+<tr>
+<td><code>-ngreentglwithgfx</code> / <code>-allow3d</code> / <code>-disablegfxfirmware</code></td>
+<td>核显加速与传统开关</td>
+</tr>
+<tr>
+<td><code>ngreen-dmc=adlp</code> / <code>-ngreenv189</code></td>
+<td>DMC 固件与版本伪装</td>
+</tr>
+<tr>
+<td><code>-ngreenkeepefi</code> / <code>-ngreenxefix</code> / <code>-ngreenfixbootmode</code></td>
+<td>早期引导修补</td>
+</tr>
+<tr>
+<td><code>-wex-memclamp</code> / <code>-wex-dpsrc-lax</code> / <code>-igfxdvmt</code></td>
+<td>显存与 DP 源宽松匹配</td>
+</tr>
+<tr>
+<td><strong><code>-wex-edp-keep</code></strong></td>
+<td><strong>复用固件训练好的 eDP 链路（内屏点亮关键）</strong></td>
+</tr>
+<tr>
+<td><strong><code>-vi2c-force-polling</code></strong></td>
+<td><strong>触摸板强制轮询（解决突停突跳）</strong></td>
+</tr>
+<tr>
+<td><code>-cpufbeta</code></td>
+<td>让 CPUFriend 在未声明支持的 macOS 版本上生效（<strong>必需</strong>，见 §5.6）</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-使用说明">10. 使用说明</h2>
+<ol>
+<li><strong>不要直接使用仓库里的 <code>config.plist</code> 启动</strong>：其中的序列号已替换为占位符
+（<code>REPLACE-WITH-YOUR-SERIAL</code> / <code>REPLACE-WITH-YOUR-MLB</code>），必须用
+<a href="https://github.com/corpnewt/GenSMBIOS">GenSMBIOS</a> 生成自己的 <code>MacBookPro16,2</code> 三码</li>
+<li>把 <code>efi/</code> 下的内容放入 EFI 分区（<code>EFI/OC/</code>），kext 按 §7 的版本自行下载放入 <code>EFI/OC/Kexts/</code></li>
+<li>安装 <code>scripts/wifi-fix.sh</code> 守护（见 §5.3）</li>
+<li>首次启动建议保留 <code>-v</code>，出问题看 <code>log show --predicate &#39;process == &quot;kernel&quot;&#39;</code></li>
+<li>内屏修复的 edp-keep 版 WhateverXe 需自行编译，见
+<a href="build.html">docs/build-from-source.md</a></li>
+</ol>
+<blockquote>
+<p>⚠️ 本仓库仅为个人机器配置记录，不构成安装指导。黑苹果有风险，操作前请备份。</p>
+</blockquote>
+<hr>
+<h2 id="11-致谢">11. 致谢</h2>
+<ul>
+<li><a href="https://github.com/b00t0x/WhateverXe">WhateverXe</a> —— Raptor Lake 核显驱动</li>
+<li><a href="https://github.com/nickk19/WhateverXe">nickk19</a> —— <code>-wex-edp-keep</code> 补丁</li>
+<li><a href="https://github.com/acidanthera/OpenCorePkg">OpenCore</a> / <a href="https://github.com/acidanthera/Lilu">Lilu</a> / <a href="https://github.com/acidanthera/VirtualSMC">VirtualSMC</a></li>
+<li><a href="https://github.com/VoodooI2C/VoodooI2C">VoodooI2C</a> —— 触摸板</li>
+<li><a href="https://github.com/OpenIntelWireless">OpenIntelWireless</a> —— Wi-Fi / 蓝牙</li>
+<li><a href="https://github.com/chris1111">chris1111</a> —— VoodooHDA Tahoe 安装器</li>
+</ul>
+<h2 id="license">License</h2>
+<p>本仓库的文档与脚本采用 MIT 协议；各第三方 kext 遵循其各自许可证。</p>
+</article><div class="article-end"><span>记录来源：EnormousKnob/zbook-g10-hackintosh</span><a href="files.html">查看配置与脚本 →</a></div></main><aside class="right-rail"><div class="toc"><p class="eyebrow">ON THIS PAGE</p><h3>本页目录</h3><a href="#1-机器配置">1. 机器配置</a><a href="#2-系统截图">2. 系统截图</a><a href="#3-硬件支持总表">3. 硬件支持总表</a><a href="#4-项目结构">4. 项目结构</a><a href="#5-关键实现说明">5. 关键实现说明</a><a href="#6-已知限制">6. 已知限制</a><a href="#7-kext-清单">7. Kext 清单</a><a href="#8-ssdt-清单">8. SSDT 清单</a><a href="#9-boot-args-逐项说明">9. boot-args 逐项说明</a><a href="#10-使用说明">10. 使用说明</a><a href="#11-致谢">11. 致谢</a><a href="#license">License</a></div><div class="rail-source"><a href="source-README.md" download>下载原始 Markdown ↓</a><p>内容快照 · 2026.11.08</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/blob/8d82ccede59dbaedd293be48a9fbbe55233f8ebf/README.md">查看 GitHub 原文 ↗</a></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>

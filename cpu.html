@@ -1,0 +1,198 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>CPU 睿频：打开上限之后 · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" ><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" ><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" ><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" aria-current="page" class="selected"><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" ><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><div class="breadcrumb"><a href="index.html">知识库</a><span>/</span><a href="overview.html">Hackintosh 实践</a><span>/</span>性能调优</div><div class="article-meta"><span class="tag">性能调优</span><span>7 分钟阅读 · 2026.11.08</span></div><div class="article-source-note">项目记录 · 适用范围与状态以原文为准，操作前请先阅读<a href="hardware.html">已知限制</a>。</div><article class="prose"><h1 id="cpu-睿频为什么只有-38ghz以及做到了哪一步">CPU 睿频：为什么只有 3.8GHz，以及做到了哪一步</h1>
+<blockquote>
+<p>机型：HP ZBook Power G10 · i7-13700H（6P + 8E / 20 线程）
+系统：macOS 26.7.1 · OpenCore + SMBIOS <code>MacBookPro16,2</code>
+结论先说：<strong>macOS 侧的上限已经从 3.8GHz 打开到 5.0GHz，但实测持续频率仍在 3.7–3.9GHz，
+根因在伪装 CPUID 与 HWP 的协同层，未彻底解决。</strong></p>
+</blockquote>
+<hr>
+<h2 id="1-症状">1. 症状</h2>
+<p>「关于本机」显示 <code>2.92 GHz</code>（这个数字本身不可信），但真正的问题是满载也上不去。
+空闲时频率在 600–1100MHz 之间跳动（说明 XCPM 变频本身是工作的），一旦压满：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>修复前实测</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>20 线程全核压满</td>
+<td>P 核 ~3.80GHz</td>
+</tr>
+<tr>
+<td>单核 / 双核压满</td>
+<td>峰值 ~3.81GHz，不再上升</td>
+</tr>
+</tbody></table></div>
+<p>i7-13700H 的规格是 <strong>P 核单核睿频 5.0GHz、E 核 4.7GHz、全核 P 核约 4.3–4.6GHz</strong>。</p>
+<h2 id="2-根因频率表是借来的">2. 根因：频率表是「借」来的</h2>
+<p>macOS 的 <code>X86PlatformPlugin</code> 按 <strong>board-id</strong> 从自身资源里挑一份电源管理 plist：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code>/System/Library/Extensions/IOPlatformPluginFamily.kext/Contents/PlugIns/
+    X86PlatformPlugin.kext/Contents/Resources/&lt;board-id&gt;.plist
+</code></pre></div>
+<p>本机 board-id = <code>Mac-5F9802EFE386AA28</code>（即 <code>MacBookPro16,2</code>），该机型真实 CPU 是
+<strong>Ice Lake i7-1068NG7</strong>，规格恰好是 <strong>全核 3.8GHz / 单核 4.1GHz</strong>——和实测封顶 3.8GHz 精确吻合。</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">plutil -p .../Resources/Mac-5F9802EFE386AA28.plist | grep -A3 Frequencies
+#   &quot;Frequencies&quot; =&gt; { &quot;3800&quot; =&gt; 1, &quot;4100&quot; =&gt; 1 }
+</code></pre></div>
+<p>也就是说：<strong>macOS 根本没认出这颗 CPU，只是照抄了一颗低它两代的 U 的频率表。</strong></p>
+<p>对应的内核侧硬限制：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">sysctl machdep.xcpm.hard_plimit_max_100mhz_ratio    # 修复前：38（=3.8GHz）
+</code></pre></div>
+<h2 id="3-方案cpufriend--换频率表">3. 方案：CPUFriend + 换频率表</h2>
+<p><code>CPUFriend</code> 的工作方式是 hook <code>X86PlatformPlugin</code> 的 <code>configResourceCallback()</code>，
+在系统请求电源管理数据时喂入自定义数据（不修改系统文件，可随时撤回）。
+数据由官方的 <code>ResourceConverter.sh</code> 从一份完整资源 plist 转成 <code>CPUFriendDataProvider.kext</code>。</p>
+<p>选表原则：<strong>找一颗 P 核基频/睿频与你最接近的机型</strong>。候选：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>board-id</th>
+<th>机型</th>
+<th>真实 CPU</th>
+<th>Frequencies 档位</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Mac-5F9802EFE386AA28</code></td>
+<td>MacBookPro16,2</td>
+<td>i7-1068NG7（Ice Lake，4C）</td>
+<td>3800 / 4100</td>
+</tr>
+<tr>
+<td><code>Mac-AA95B1DDAB278B95</code></td>
+<td>MacBookPro16,1</td>
+<td>i9-9980HK（CFL-H，8C）</td>
+<td>4100 / 4300 / 4600 / <strong>5000</strong></td>
+</tr>
+</tbody></table></div>
+<p>i9-9980HK 是「基频 2.4GHz、单核 5.0GHz」——与 13700H 的 P 核规格几乎一模一样，故选它。</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash"># CPUFriend 官方 release 自带 Tools/ResourceConverter.sh
+sh Tools/ResourceConverter.sh --kext Mac-AA95B1DDAB278B95.plist
+# → 当前目录产出 CPUFriendDataProvider.kext
+</code></pre></div>
+<p>部署：</p>
+<ol>
+<li><code>CPUFriend.kext</code>、<code>CPUFriendDataProvider.kext</code> 放进 <code>EFI/OC/Kexts</code></li>
+<li><code>config.plist</code> → <code>Kernel → Add</code> 两条，位置排在 <code>Lilu.kext</code> <strong>之后</strong>（本机插在 index 1、2）</li>
+<li><code>boot-args</code> 追加 <strong><code>-cpufbeta</code></strong></li>
+</ol>
+<h2 id="4-最大的坑-cpufbeta">4. 最大的坑：<code>-cpufbeta</code></h2>
+<p>CPUFriend 的 RELEASE 二进制带内核版本白名单，<strong>macOS 26 不在白名单里</strong>。
+不加 <code>-cpufbeta</code> 时它不报错、不进日志，只是<strong>静默不注入</strong>——现象极难判断：</p>
+<ul>
+<li><code>kextstat</code> 里 <code>CPUFriend</code> 明明已加载</li>
+<li><code>machdep.xcpm.vectors_loaded_count = 1</code> 看起来也正常</li>
+<li>但频率表一个字都没变</li>
+</ul>
+<p>判定注入是否真的生效，看运行时资源（不是磁盘上的 plist）：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">ioreg -l -n X86PlatformPlugin | grep -o &#39;&quot;Frequencies&quot;={[^}]*}&#39;
+# 未生效：{&quot;4100&quot;=1,&quot;3800&quot;=1}
+# 已生效：{&quot;4300&quot;=1,&quot;4600&quot;=2,&quot;5000&quot;=3,&quot;4100&quot;=0}
+
+sysctl machdep.xcpm.hard_plimit_max_100mhz_ratio
+# 38 → 50（=5.0GHz）
+</code></pre></div>
+<blockquote>
+<p>官方文档在 <code>Instructions.md</code> 里写了这条：
+<code>Add -cpufbeta to enable CPUFriend on unsupported OS versions.</code></p>
+</blockquote>
+<h2 id="5-效果上限打开了持续频率没有">5. 效果：上限打开了，持续频率没有</h2>
+<p>修复后 macOS 侧一切绿灯：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hard_plimit_max_100mhz_ratio</code></td>
+<td>50（5.0GHz）</td>
+</tr>
+<tr>
+<td><code>bootpst</code>（启动性能档）</td>
+<td>50</td>
+</tr>
+<tr>
+<td>电源</td>
+<td>AC 供电，<code>lowpowermode 0</code></td>
+</tr>
+<tr>
+<td>热状态</td>
+<td><code>pmset -g therm</code> 无任何警告，<code>CPU_Speed_Limit 100</code></td>
+</tr>
+<tr>
+<td>封装功耗（单核满载）</td>
+<td>仅 13–15W（PL1 45W，余量巨大）</td>
+</tr>
+<tr>
+<td>运行时频率表</td>
+<td>4300 / 4600 / 5000 三档已注入</td>
+</tr>
+</tbody></table></div>
+<p>但实测仍然上不去。用两种<strong>独立</strong>方法交叉验证（powermetrics 的平均值会被 C-state 拉低，不可单独采信）：</p>
+<p><strong>方法 A：powermetrics</strong></p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">sudo powermetrics -n 3 -i 1500 --samplers cpu_power | grep &#39;CPU Average frequency&#39;
+# 峰值 ~3.92GHz（修复前 ~3.81GHz，略有提升）
+</code></pre></div>
+<p><strong>方法 B：自写 AVX2+FMA 峰值算力基准（不依赖任何系统频率标定）</strong></p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-c">// 8 条独立 FMA 链跑满 P 核的 2 个 256-bit FMA 端口 = 32 FLOP/cycle
+// 实测 GFLOPS ÷ 32 ÷ 0.95 ≈ 真实核心频率
+</code></pre></div>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>轮次</th>
+<th>GFLOPS</th>
+<th>换算频率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>59.05</td>
+<td>~1.9GHz（落到了 E 核）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>79.23</td>
+<td>~2.6GHz（被调度/降频影响）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>110.96</td>
+<td><strong>~3.65GHz</strong></td>
+</tr>
+</tbody></table></div>
+<p>若真有 5.0GHz，此基准应给出 ~149 GFLOPS。<strong>结论：3.7–3.9GHz 是真实频率，不是显示误差。</strong></p>
+<h2 id="6-剩下的瓶颈未解决">6. 剩下的瓶颈（未解决）</h2>
+<p>已排除：XCPM 硬限制、电源模式、温度墙、功耗墙、调度限制、频率表缺档。</p>
+<p>最可能的解释：<code>config.plist → PlatformInfo → Generic → Emulate → Cpuid1Data</code>
+把 CPUID 伪装成 <strong><code>0x000A0655</code>（Comet Lake）</strong>——这是让 macOS 26 接受这颗 CPU + 核显补丁的前提。
+伪装之后，macOS 的 HWP/EPP 调频策略仍按「一颗 Comet Lake」来跑，
+真实 Raptor Lake 的 HWP 能力表（最高 5.0GHz）没有被完整驱动。</p>
+<p>想继续逼近，可尝试（均未验证、风险自担）：</p>
+<ul>
+<li>DEBUG 版 CPUFriend + <code>-cpufdbg</code>，确认数据是否被后续流程覆盖</li>
+<li>换 <code>Cpuid1Data</code> 目标（会影响核显补丁，可能直接黑屏）</li>
+<li>注入 EPP / HWP 相关 SSDT（收益不确定）</li>
+</ul>
+<p>对日常使用而言，3.7–3.9GHz 的单核性能与 20 线程并行能力已经够用，
+且该配置<strong>两次完整重启验证稳定</strong>，故保持现状。</p>
+<h2 id="7-复现清单">7. 复现清单</h2>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash"># 1) 确认当前 board-id 与频率表
+ioreg -l | grep -m1 board-id
+plutil -p .../Resources/$(ioreg -l | grep -m1 board-id | grep -o &#39;Mac-[A-F0-9]*&#39;).plist | grep -A3 Frequencies
+
+# 2) 下载 CPUFriend release，转换选定的资源表
+curl -L -o cf.zip https://github.com/acidanthera/CPUFriend/releases/download/1.2.9/CPUFriend-1.2.9-RELEASE.zip
+unzip -q cf.zip &amp;&amp; sh Tools/ResourceConverter.sh --kext Mac-AA95B1DDAB278B95.plist
+
+# 3) 两个 kext 进 EFI，config 加两条 Kernel→Add（Lilu 之后），boot-args 加 -cpufbeta
+
+# 4) 重启后验证
+ioreg -l -n X86PlatformPlugin | grep -o &#39;&quot;Frequencies&quot;={[^}]*}&#39;
+sysctl machdep.xcpm.hard_plimit_max_100mhz_ratio
+</code></pre></div>
+</article><div class="article-end"><span>记录来源：EnormousKnob/zbook-g10-hackintosh</span><a href="files.html">查看配置与脚本 →</a></div></main><aside class="right-rail"><div class="toc"><p class="eyebrow">ON THIS PAGE</p><h3>本页目录</h3><a href="#1-症状">1. 症状</a><a href="#2-根因频率表是借来的">2. 根因：频率表是「借」来的</a><a href="#3-方案cpufriend--换频率表">3. 方案：CPUFriend + 换频率表</a><a href="#4-最大的坑-cpufbeta">4. 最大的坑：-cpufbeta</a><a href="#5-效果上限打开了持续频率没有">5. 效果：上限打开了，持续频率没有</a><a href="#6-剩下的瓶颈未解决">6. 剩下的瓶颈（未解决）</a><a href="#7-复现清单">7. 复现清单</a></div><div class="rail-source"><a href="source-docs--cpu-turbo.md" download>下载原始 Markdown ↓</a><p>内容快照 · 2026.11.08</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/blob/8d82ccede59dbaedd293be48a9fbbe55233f8ebf/docs/cpu-turbo.md">查看 GitHub 原文 ↗</a></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>

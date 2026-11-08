@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>Wi-Fi 自愈与触摸板排障 · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" ><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" ><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" ><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" ><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" aria-current="page" class="selected"><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><div class="breadcrumb"><a href="index.html">知识库</a><span>/</span><a href="overview.html">Hackintosh 实践</a><span>/</span>自动化</div><div class="article-meta"><span class="tag">自动化</span><span>2 分钟阅读 · 2026.11.08</span></div><div class="article-source-note">项目记录 · 适用范围与状态以原文为准，操作前请先阅读<a href="hardware.html">已知限制</a>。</div><article class="prose"><h1 id="wi-fi-自愈与触摸板排障">Wi-Fi 自愈与触摸板排障</h1>
+<p>摘录自项目 README；脚本可在本站的「项目文件」中下载。</p>
+<h3 id="52-触摸板突停突跳">5.2 触摸板：突停突跳</h3>
+<p><strong>症状</strong>：光标移动时突然卡住，然后一次跳到很远处。</p>
+<ul>
+<li>触摸板型号 ELAN07BB，走 I2C HID（<code>VoodooI2C</code>），默认使用 GPIO 中断（<code>gpioPin 323</code>）</li>
+<li>HP 机型的 GPIO 中断不可靠：中断丢失 → 事件在驱动里积压 → 恢复时一次性涌出</li>
+<li>日志里没有任何 I2C 错误，因为链路本身没坏，坏的是“通知机制”</li>
+</ul>
+<p><strong>解决</strong>：强制轮询模式</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-diff">- amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep
++ amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep -vi2c-force-polling
+</code></pre></div>
+<p>代价是极小的 CPU 占用（8 ms 报告周期），换来完全稳定的手感。</p>
+<h3 id="53-wi-fi重启后必须手动开关">5.3 Wi-Fi：重启后必须手动开关</h3>
+<p><strong>症状</strong>：每次重启后 Wi-Fi 图标是灰的，手动关一下再开就正常。</p>
+<p><strong>根因</strong>：<code>airportd</code> 在 <code>itlwm</code> 接口就绪<strong>之前</strong>启动，初始化失败后不再重试；手动开关等于变相重启 <code>airportd</code>。</p>
+<p><strong>解决</strong>：开机守护，检测接口状态，必要时重启 <code>airportd</code>（见 <code>scripts/</code>）。</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">sudo cp scripts/wifi-fix.sh /usr/local/bin/wifi-fix.sh
+sudo chmod 755 /usr/local/bin/wifi-fix.sh
+sudo cp scripts/com.jeff.wififix.plist /Library/LaunchDaemons/
+sudo chown root:wheel /Library/LaunchDaemons/com.jeff.wififix.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.jeff.wififix.plist
+</code></pre></div>
+</article><div class="article-end"><span>记录来源：EnormousKnob/zbook-g10-hackintosh</span><a href="files.html">查看配置与脚本 →</a></div></main><aside class="right-rail"><div class="toc"><p class="eyebrow">ON THIS PAGE</p><h3>本页目录</h3></div><div class="rail-source"><a href="source-README.md" download>下载原始 Markdown ↓</a><p>内容快照 · 2026.11.08</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/blob/8d82ccede59dbaedd293be48a9fbbe55233f8ebf/README.md">查看 GitHub 原文 ↗</a></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>

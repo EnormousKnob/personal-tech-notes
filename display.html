@@ -1,0 +1,238 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Jeff 的个人技术知识库：IT 支持、开发与运维实践，HP ZBook Power G10 黑苹果配置与故障排查记录。"><title>内屏黑屏：从 AUX 超时到 eDP keep · Jeff 的技术手记</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head><body><a class="skip" href="#main">跳转到正文</a><header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">//</span><span>Jeff 的技术手记<small>NOTES FROM THE WORKBENCH</small></span></a><nav class="top-nav" aria-label="主导航"><a href="index.html" >知识库</a><a href="overview.html">黑苹果专题</a><a href="files.html">项目文件</a><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav><button class="mobile-menu" aria-expanded="false" aria-controls="sidebar" aria-label="展开文档导航">☰</button></header><div class="layout"><aside class="sidebar" id="sidebar"><a class="side-home " href="index.html"><span>⌂</span> 知识库首页</a><p class="side-label">专 题 / 01</p><div class="side-topic">Hackintosh 实践<span>HP ZBook Power G10</span></div><nav aria-label="专题文档"><a href="overview.html" ><span class="nav-icon">◈</span>项目全记录</a><a href="hardware.html" ><span class="nav-icon">▦</span>硬件支持与限制</a><a href="display.html" aria-current="page" class="selected"><span class="nav-icon">▱</span>内屏黑屏排查</a><a href="cpu.html" ><span class="nav-icon">⌘</span>CPU 睿频记录</a><a href="build.html" ><span class="nav-icon">⌁</span>驱动构建与部署</a><a href="wifi.html" ><span class="nav-icon">⌁</span>Wi-Fi 与触摸板</a></nav><div class="side-divider"></div><a class="" href="files.html"><span>↓</span> 项目文件</a><a class="" href="about.html"><span>◎</span> 关于本站</a><div class="sidebar-foot"><span class="status-dot"></span> 持续记录，持续解决<br><small>IT SUPPORT · DEV · OPS</small></div></aside><main id="main" tabindex="-1"><div class="breadcrumb"><a href="index.html">知识库</a><span>/</span><a href="overview.html">Hackintosh 实践</a><span>/</span>故障排查</div><div class="article-meta"><span class="tag">故障排查</span><span>5 分钟阅读 · 2026.11.08</span></div><div class="article-source-note">项目记录 · 适用范围与状态以原文为准，操作前请先阅读<a href="hardware.html">已知限制</a>。</div><article class="prose"><h1 id="内屏edp点亮完整诊断记录">内屏（eDP）点亮：完整诊断记录</h1>
+<p>本文记录 <strong>“跑码时内屏正常、进系统后黑屏”</strong> 这一问题的完整排查过程与技术结论，供同机型（Raptor Lake-H + 无独显）遇到相同症状的人参考。</p>
+<hr>
+<h2 id="1-症状">1. 症状</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>现象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>开机跑码</td>
+<td>内屏正常显示（Verbose 文字正常滚动）</td>
+</tr>
+<tr>
+<td>驱动接管瞬间</td>
+<td>屏幕变黑</td>
+</tr>
+<tr>
+<td>手电筒照射</td>
+<td><strong>有背光、无画面</strong>（背光一直亮着）</td>
+</tr>
+<tr>
+<td>外接显示器</td>
+<td>正常，可进系统</td>
+</tr>
+<tr>
+<td>系统内</td>
+<td><code>ioreg</code> 能看到内屏（1920×1080，主显示器）</td>
+</tr>
+</tbody></table></div>
+<p>三条关键事实：<strong>系统认得内屏、背光亮着、就是没有画面</strong> —— 说明问题在“视频链路”，不在背光、不在面板识别。</p>
+<hr>
+<h2 id="2-定位过程">2. 定位过程</h2>
+<h3 id="21-排除背光">2.1 排除背光</h3>
+<ul>
+<li>手电筒能看到背光常亮 → 背光已开</li>
+<li>PCH PWM 占空比已到 100%，但屏幕不亮 → 亮度不走传统 PWM 路径</li>
+<li>面板 DPCD <code>0x721 = 0x84</code>：面板处于 <strong>AUX 背光模式</strong>（背光由 DPCD 寄存器控制），<code>0x722/0x723 = 0xBF00</code>（固件设定的约 74% 亮度）</li>
+</ul>
+<p><strong>结论</strong>：背光由面板固件通过 DPCD 锁存维持，与“是否有画面”无关。</p>
+<h3 id="22-锁定视频链路">2.2 锁定视频链路</h3>
+<p>内核日志给出决定性证据：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code>FB0: Hardware mode set failed, err = 0xe00002d8
+[IGFB][ERROR][AUX] ddi = 0 Time out: 0x5d10023f
+</code></pre></div>
+<ul>
+<li><code>0xe00002d8</code> = <code>kIOReturnTimeout</code>，AUX 事务重试耗尽</li>
+<li><code>0x5d10023f</code> 的 bit28 是 <strong>TIMEOUT_ERROR</strong></li>
+</ul>
+<p>即：<strong>驱动做 modeset 时，所有 AUX 事务都超时，eDP 链路从未完成训练</strong>，所以没有视频输出。</p>
+<h3 id="23-面板与-aux-硬件是否正常">2.3 面板与 AUX 硬件是否正常？</h3>
+<p>用裸寄存器直接访问 DP AUX 通道（绕过驱动栈）做探针，得到：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>探测</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DPCD <code>0x000</code>–<code>0x00F</code>（接收器能力）</td>
+<td>可读，正常</td>
+</tr>
+<tr>
+<td>DPCD <code>0x202</code>（链路状态）</td>
+<td><code>0x01</code>（仅 CR 完成，未完成信道均衡）</td>
+</tr>
+<tr>
+<td>DPCD <code>0x721</code>（背光模式）</td>
+<td><code>0x84</code>（AUX 背光模式锁存）</td>
+</tr>
+<tr>
+<td>DPCD <code>0x722/0x723</code>（亮度）</td>
+<td><code>0xBF00</code></td>
+</tr>
+<tr>
+<td>写入 <code>0x722 = 0xFFFF</code></td>
+<td>AUX 应答 ACK（status=0），但<strong>寄存器值不变</strong></td>
+</tr>
+</tbody></table></div>
+<p>结论：<strong>面板与 AUX 通道本身是好的</strong>；面板在链路未训练时对 DPCD 写入返回 ACK 但不落盘（冻结快照行为）。</p>
+<h3 id="24-为什么固件能驱动不能">2.4 为什么固件能、驱动不能？</h3>
+<ul>
+<li>固件（BIOS/UEFI）在开机早期已经完成 eDP 链路训练 → 跑码阶段有画面</li>
+<li>macOS 驱动接管后<strong>重新训练</strong>这条链路，但它的 AUX 事务要先经过电源井（power well）状态机</li>
+<li>这台机器的黑苹果环境下，该状态机不工作 → 驱动侧 AUX 全部超时</li>
+</ul>
+<p>裸寄存器直连 AUX 是成功的，说明<strong>差别只在驱动封装的电源井流程</strong>，不在硬件。</p>
+<hr>
+<h2 id="3-失败的尝试供参考不要重走">3. 失败的尝试（供参考，不要重走）</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>调整 DVMT / 显存补丁</td>
+<td>无关，<code>FB0</code> 依然 AUX 超时</td>
+</tr>
+<tr>
+<td>反汇编驱动，替换内部 AUX worker（vtable hook）</td>
+<td><strong>会卡启动</strong>。在 <code>processKext</code> 阶段改 vtable 影响早期启动路径，两次验证均死机/卡 verbose</td>
+</tr>
+<tr>
+<td>修改 DPCD 强制设置链路参数</td>
+<td>写入被 ACK 但不生效（链路未训练时面板冻结 DPCD）</td>
+</tr>
+<tr>
+<td>等待电源井就绪后重试</td>
+<td>超时依旧，状态机不推进</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>教训：<strong>不要在启动关键期用 vtable 钩子改图形驱动内部函数</strong>。代价是整个系统起不来。</p>
+</blockquote>
+<hr>
+<h2 id="4-最终方案-wex-edp-keep">4. 最终方案：<code>-wex-edp-keep</code></h2>
+<p>来自 WhateverXe 上游 <a href="https://github.com/b00t0x/WhateverXe/issues/43">issue #43</a>（2026-11）的社区方案。</p>
+<p>核心思路：<strong>既然固件已经把链路训练好了，就不要重训。</strong></p>
+<p>驱动在 modeset 时会先检查链路是否已由固件训练完成：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code>若 已训练完成 → 返回 Partial modeset（只更新部分状态，不动链路）
+</code></pre></div>
+<p>加启动参数即可：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-diff">- amfi_get_out_of_my_way=1 msgbuf=1048576 -v
++ amfi_get_out_of_my_way=1 msgbuf=1048576 -v -wex-edp-keep
+</code></pre></div>
+<h3 id="验证">验证</h3>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code class="language-bash">ioreg -l | grep WEXEDPKeep
+</code></pre></div>
+<p>输出示例：</p>
+<div class="code-block"><button class="copy-code" type="button" aria-label="复制代码">复制</button><pre><code>&quot;WEXEDPKeep&quot; = &lt;01000000 04000000 04000000 00000000 ...&gt;
+</code></pre></div>
+<p>字段含义：</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>version</td>
+<td>1</td>
+<td>记录结构版本</td>
+</tr>
+<tr>
+<td>call</td>
+<td>4</td>
+<td>驱动共请求 4 次完整 modeset</td>
+</tr>
+<tr>
+<td>kept</td>
+<td>4</td>
+<td><strong>4 次全部被拦截为 Partial modeset</strong></td>
+</tr>
+<tr>
+<td>reasons</td>
+<td>0</td>
+<td>拦截原因位图（0 = 均为“链路已训练”）</td>
+</tr>
+</tbody></table></div>
+<p>同时内核日志中的 <code>Hardware mode set failed</code> 完全消失，内屏点亮，Metal 加速正常。</p>
+<h3 id="该方案的机制细节">该方案的机制细节</h3>
+<ol>
+<li><code>wrapDisplay13ReadAUX</code> 中捕获面板 DPCD 的链路能力（<code>capLinkCaps</code>）</li>
+<li>驱动在完整 modeset 时调用 <code>Display13EDPKeep</code> 决策</li>
+<li>满足条件（DDI &lt; 2 且该端口配置为内屏、链路已训练）时返回 <code>Partial modeset</code></li>
+<li>于是 <code>TRANS_DDI_FUNC_CTL</code> / <code>TRANSCONF</code> / 时序寄存器按请求更新，但<strong>不重新训练链路</strong></li>
+</ol>
+<hr>
+<h2 id="5-代价与限制">5. 代价与限制</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>结果</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>睡眠唤醒</td>
+<td>内屏黑到重启</td>
+<td>唤醒触发完整 modeset 重训</td>
+</tr>
+<tr>
+<td>手动关闭显示器</td>
+<td>同上</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>切换分辨率 / 刷新率</td>
+<td>同上</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>日常使用（不碰上述操作）</td>
+<td>完全正常</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p>规避方式：系统设置里关闭显示器休眠、不手动关屏、分辨率保持默认。</p>
+<hr>
+<h2 id="6-复现所需的最小配置">6. 复现所需的最小配置</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="可横向滚动的数据表"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>核显</td>
+<td><code>0xA720</code>（Raptor Lake-H/P Iris Xe）</td>
+</tr>
+<tr>
+<td>驱动</td>
+<td>WhateverXe ≥ 0.6.1（0.7.0 验证通过）</td>
+</tr>
+<tr>
+<td>补丁</td>
+<td>edp-keep 系列 3 个 commit（eDP 端口准入、VBT panel type <code>0xFF</code>、keep 决策钩子）</td>
+</tr>
+<tr>
+<td>启动参数</td>
+<td><code>-wex-edp-keep</code></td>
+</tr>
+<tr>
+<td>前提</td>
+<td>固件阶段内屏已点亮（跑码有画面）</td>
+</tr>
+</tbody></table></div>
+<p>若跑码阶段内屏就不亮，说明固件没有训练链路，此方案不适用。</p>
+</article><div class="article-end"><span>记录来源：EnormousKnob/zbook-g10-hackintosh</span><a href="files.html">查看配置与脚本 →</a></div></main><aside class="right-rail"><div class="toc"><p class="eyebrow">ON THIS PAGE</p><h3>本页目录</h3><a href="#1-症状">1. 症状</a><a href="#2-定位过程">2. 定位过程</a><a href="#3-失败的尝试供参考不要重走">3. 失败的尝试（供参考，不要重走）</a><a href="#4-最终方案-wex-edp-keep">4. 最终方案：-wex-edp-keep</a><a href="#5-代价与限制">5. 代价与限制</a><a href="#6-复现所需的最小配置">6. 复现所需的最小配置</a></div><div class="rail-source"><a href="source-docs--internal-display-fix.md" download>下载原始 Markdown ↓</a><p>内容快照 · 2026.11.08</p><a href="https://github.com/EnormousKnob/zbook-g10-hackintosh/blob/8d82ccede59dbaedd293be48a9fbbe55233f8ebf/docs/internal-display-fix.md">查看 GitHub 原文 ↗</a></div></aside></div><footer class="site-footer"><span>© 2026 Jeff · 把经验写下来，把问题解决掉。</span><a href="about.html">来源与许可</a><span>内容快照 · 2026.11.08</span></footer><div class="toast" role="status" aria-live="polite"></div></body></html>
